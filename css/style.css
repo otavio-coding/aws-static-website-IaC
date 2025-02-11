@@ -1,15 +1,18 @@
-
-
-body{
+html {
+  scroll-behavior: smooth;
   --margin: 20vh;
   --padding: 5vh;
+  --pallete1: #D77840;
+}
+
+body{
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   margin: 0;
   padding: 0;
   max-width: 100%;
   height: 230vh;
 }
-  
+
 section{
   margin: 0;
   padding: 0;
@@ -50,7 +53,7 @@ nav {
 /* HERO SECTION*/
 .hero-content {
   height: 80vh;
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("../images/photos/long-shot-man-working-roof.jpg");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5) ), url("../assets/photos/long-shot-man-working-roof.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -85,7 +88,7 @@ nav {
   justify-content: center;
   align-items: center;
   height: 25vh;
-  background-color: #D77840;
+  background-color: rgb(59, 58, 65);
 
 } 
 
@@ -137,7 +140,7 @@ nav {
 /* FOOTER */
 
 footer {
-  background-color: #ffd1b7;
+  background-color: aliceblue;
   height: 45vh;
   display: flex;
   justify-content: center;
