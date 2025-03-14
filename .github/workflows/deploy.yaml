@@ -32,8 +32,11 @@ jobs:
           role-session-name: GithubActionsSession
           aws-region: ${{ secrets.AWS_REGION }}
       
-      - name: Setup Terrform.
+      - name: Setup Terraform.
         uses: hashicorp/setup-terraform@v3
+      
+      - name: Terraform Init.
+        run: terraform init ./infra
 
       - name: Terraform Validate.
         run: terraform validate ./infra
