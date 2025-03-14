@@ -29,7 +29,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsRole
-          role-duration-seconds: 28800
+          role-session-name: GithubActionsSession
           aws-region: ${{ secrets.AWS_REGION }}
       
       - name: Setup Terrform.
@@ -51,9 +51,9 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
-          role-session-name: GitHubActionsSession
-          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GithubActionsRole
+          role-session-name: GithubActionsSession
+          aws-region: ${{ secrets.AWS_REGION }}
           
       - name: Deploy to S3
         run: aws s3 sync public/ s3://your-bucket-name --delete
