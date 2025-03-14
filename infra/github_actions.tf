@@ -11,15 +11,16 @@ resource "aws_iam_role" "github_oidc_role" {
       }
       Action = "sts:AssumeRoleWithWebIdentity"
       Condition = {
-        StringEquals = {
+        StringLike = {
           "token.actions.githubusercontent.com:sub" = "repo:${var.github_account_id}/:${var.github_repo}:ref:refs/heads/main",
+        }
+        StringEquals = {
           "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
         }
       }
     }]
   })
 }
-
 
 resource "aws_iam_role_policy" "s3_deploy_policy" {
   role = aws_iam_role.github_oidc_role.name
@@ -33,8 +34,6 @@ data "aws_iam_policy_document" "s3_deploy_policy" {
     resources = ["arn:aws:s3:::${aws_s3_bucket.website.id}/*"]
   }  
 }
-
-
 
 #Setting up a OIDC provider.
 data "tls_certificate" "github" {
