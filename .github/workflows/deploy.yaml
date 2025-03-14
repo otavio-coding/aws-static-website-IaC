@@ -1,0 +1,56 @@
+name: Deploy public/ folder to S3.
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  html-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v3
+
+      - name: Validate HTML.
+        run: npx html-validate "public/*.html"
+
+  terraform-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/GitHubActionsRole
+          role-session-name: GitHubActionsSession
+          aws-region: us-east-1
+      
+      - name: Setup Terrform.
+        uses: hashicorp/terraform@v3
+
+      - name: Terraform Validate.
+        run: terraform validate ./infra
+
+      - name: Terraform Plan.
+        run: terraform plan ./infra
+
+  deploy:
+    needs: [html-validation, terraform-testing]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository.
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/GitHubActionsRole
+          role-session-name: GitHubActionsSession
+          aws-region: us-east-1
+          
+      - name: Deploy to S3
+        run: aws s3 sync public/ s3://your-bucket-name --delete
+
