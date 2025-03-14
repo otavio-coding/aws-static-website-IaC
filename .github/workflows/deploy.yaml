@@ -4,6 +4,10 @@ on:
   push:
     branches:
       - main
+
+permissions:
+  id-token: write   # This is required for requesting the JWT
+  contents: read    # This is required for actions/checkout
       
 jobs:
   html-validation:
@@ -24,9 +28,9 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           role-session-name: GitHubActionsSession
-          aws-region: us-east-1
+          aws-region: ${{ secrets.AWS_REGION }}
       
       - name: Setup Terrform.
         uses: hashicorp/setup-terraform@v3
@@ -47,7 +51,7 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::YOUR_ACCOUNT_ID:role/GitHubActionsRole
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/GitHubActionsRole
           role-session-name: GitHubActionsSession
           aws-region: us-east-1
           
