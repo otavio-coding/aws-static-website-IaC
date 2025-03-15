@@ -40,11 +40,13 @@ jobs:
         working-directory: ./infra
 
       - name: Terraform Validate.
-        run: terraform validate ./infra
+        run: terraform validate
+        working-directory: ./infra
 
       - name: Terraform Plan.
-        run: terraform plan ./infra
-
+        run: terraform plan
+        working-directory: ./infra
+        
   deploy:
     needs: [html-validation, terraform-testing]
     runs-on: ubuntu-latest
