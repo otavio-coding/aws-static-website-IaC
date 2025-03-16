@@ -6,6 +6,7 @@ variable "bucket_name" {
 variable "aws_account_id" {
   description = "AWS account ID"
   type = number
+  sensitive = true
 }
 
 variable "github_account_id" {
