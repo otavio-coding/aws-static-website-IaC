@@ -35,10 +35,10 @@ This project provisions a static website hosting with public read permitions inf
 
 ## How to use it 
 
-1 - Set the terraform variable on a `.tfvars` file or pass it as arguments in the next step.
-2 - Run `terraform apply`. This step is necessary to create the IAM role and permissions that allow GitHub Actions to deploy to your S3 bucket.
-3 - Update the `index.html` file and push your changes to main to trigger the CI. The contents of the `public/` folder will be deployed into your S3 bucket.
-4 - That's it, your static website is up and running on your registered domain (`www.example.com` or `example.com`)
+1. Set the terraform variable on a `.tfvars` file or pass it as arguments in the next step.
+2. Run `terraform apply`. This step is necessary to create the IAM role and permissions that allow GitHub Actions to deploy to your S3 bucket.
+3. Update the `index.html` file and push your changes to main to trigger the CI. The contents of the `public/` folder will be deployed into your S3 bucket.
+4. That's it, your static website is up and running on your registered domain (`www.example.com` or `example.com`)
 
 ## Disclaimer
 
