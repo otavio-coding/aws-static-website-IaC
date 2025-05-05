@@ -44,7 +44,7 @@ jobs:
         working-directory: ./infra
 
       - name: Terraform Plan.
-        run: terraform plan -var='aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}' -var='bucket_name="${{ secrets.AWS_BUCKET_NAME }}"' -var='github_account_id="otavio-coding"' -var='github_repo="static-website-template"'
+        run: terraform plan -var='aws_account_id=${{ secrets.AWS_ACCOUNT_ID }}' -var='registered_domain="${{ secrets.AWS_REGISTERED_DOMAIN }}"' -var='github_account_id="otavio-coding"' -var='github_repo="aws-static-website-IaC"'
         working-directory: ./infra
 
   deploy:
@@ -62,5 +62,5 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           
       - name: Deploy to S3
-        run: aws s3 sync public/ s3://${{ secrets.AWS_BUCKET_NAME }} --delete
+        run: aws s3 sync public/ s3://www.${{ secrets.AWS_REGISTERED_DOMAIN }} --delete
 
