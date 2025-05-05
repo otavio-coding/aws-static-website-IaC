@@ -1,5 +1,12 @@
-/* Create IAM role for Github Actions using OIDC a S3 deploy policy and than attach
-it to the user */
+/* 
+This file contains IaC that creates:
+  - An IAM role to be assumed by Github Actions using OIDC 
+  - A IAM policy with deploy permitions;
+  - OIDC settings for Github.
+*/
+
+/* The following lines create an IAM role to be assumed by Github Actions workflows.
+OIDC allows secure, short-lived access to AWS without storing credentials.*/
 resource "aws_iam_role" "github_oidc_role" {
   name = "GithubActionsRole"
   assume_role_policy = jsonencode({
@@ -22,20 +29,21 @@ resource "aws_iam_role" "github_oidc_role" {
   })
 }
 
-resource "aws_iam_role_policy" "s3_deploy_policy" {
-  role = aws_iam_role.github_oidc_role.name
-  policy = data.aws_iam_policy_document.s3_deploy_policy.json
-}
-
+/* Here is a policy that allows the Github Actions role update the bucket content.*/
 data "aws_iam_policy_document" "s3_deploy_policy" {
   statement {
     effect    = "Allow"
     actions   = ["s3:PutObject", "s3:DeleteObject", "s3:ListBucket"]
-    resources = ["arn:aws:s3:::${aws_s3_bucket.website.id}/*"]
-  }  
+    resources = ["arn:aws:s3:::${aws_s3_bucket.www.id}/*"]
+  }
+}
+resource "aws_iam_role_policy" "s3_deploy_policy" {
+  role   = aws_iam_role.github_oidc_role.name
+  policy = data.aws_iam_policy_document.s3_deploy_policy.json
 }
 
-#Setting up a OIDC provider.
+
+/* The following lines set up an OIDC for secure access to AWS from Github workflows.*/
 data "tls_certificate" "github" {
   url = "https://token.actions.githubusercontent.com/.well-known/openid-configuration"
 }
