@@ -34,7 +34,7 @@ data "aws_iam_policy_document" "s3_deploy_policy" {
   statement {
     effect    = "Allow"
     actions   = ["s3:PutObject", "s3:DeleteObject", "s3:ListBucket"]
-    resources = ["arn:aws:s3:::${aws_s3_bucket.www.id}/*"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.subdomain.id}/*"]
   }
 }
 resource "aws_iam_role_policy" "s3_deploy_policy" {

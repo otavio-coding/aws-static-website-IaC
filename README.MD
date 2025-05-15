@@ -1,6 +1,6 @@
 # Infrastructure as Code (IaC) for Static Website Hosting on AWS S3
-## Demo: http://otaviocoding.click
-This project provisions a static website hosting with public read permitions infrastructure on AWS S3 using Terraform. It also includes a GitHub Actions workflow for continuous integration (CI), so every time you push to this repository, the changes are tested and the `public/` folder content is automatically deployed to the bucket. 
+## Demo: http://dev.otaviocoding.click
+This project provisions a static website hosting infrastructure with public read permitions on AWS S3 using Terraform. It also includes a GitHub Actions workflow for continuous integration (CI), so every time you push to this repository, the changes are tested and the `public/` folder content is automatically deployed to the bucket. 
 
 ## Dependencies
 
@@ -9,9 +9,13 @@ This project provisions a static website hosting with public read permitions inf
 ## Prerequisites
 
 ### For AWS Infrastructure
-
-- A registered domain with an existing hosted zone in Route 53  
-- Terraform installed and configured with valid AWS credentials
+- Valid AWS credentials
+- A registered domain `example.com` with an existing hosted zone in Route 53  
+- An ACM-Amazon Certificate Manager issued certificate for the domain name `*.example.com`. 
+- Your Route 53 Hosted Zone must contain:
+  - The certificate CNAME record.
+  - NS-Name Server record and a SOA-Stat of Authority record (if you bought your domain from Route 53 domain 
+  registry services the hosted zone will be created automatically with both).
 
 ### For GitHub Actions CI
 
@@ -21,28 +25,34 @@ This project provisions a static website hosting with public read permitions inf
   - `AWS_REGISTERED_DOMAIN`  
   These variables are required in the `deploy.yaml` workflow file.
 
-## AWS Resources Created
+## AWS Resources Created after `terraform apply`
 
-- **Two S3 Buckets**:
-  - One for the root domain (e.g., `example.com`) that redirects to the second bucket
-  - One for the `www` subdomain (e.g., `www.example.com`) which hosts the website content
+- **An S3 Bucket**:
+  - A bucket for the `www` subdomain (e.g., `www.example.com`) which stores the website content
+
+- **A CloudFront distribution**:
+  - A cloudfront distribution that will serve the `index.html` from the s3 bucket using a HTTPS connection.
 
 - **Route 53 Records**:
-  - Alias records pointing to the S3 buckets, created in an existing hosted zone
+  - Alias records pointing from `subdomain.example.com` to the CloudFront distribution, created in an existing hosted zone. 
 
 - **IAM Role**:
   - Configured with OIDC and can be assumed by GitHub Actions for secure, short-lived access
 
 ## How to use it 
 
-1. Set the terraform variable on a `.tfvars` file or pass it as arguments in the next step.
+1. Set the terraform variable on a `infra/.tfvars` file:
+```
+registered_domain = "example.com"
+acm_domain_name   = "*.example.com"
+subdomain         = "dev"
+aws_account_id    = <your-aws-account-id>
+github_account_id = "<your-github-id>"
+github_repo       = "<github-repo-name>" 
+```
 2. Run `terraform apply`. This step is necessary to create the IAM role and permissions that allow GitHub Actions to deploy to your S3 bucket.
 3. Update the `index.html` file and push your changes to main to trigger the CI. The contents of the `public/` folder will be deployed into your S3 bucket.
 4. That's it, your static website is up and running on your registered domain (`www.example.com` or `example.com`)
-
-## Disclaimer
-
-This infrastructure currently supports only **HTTP** connections. **Do not use this setup to host sensitive or private data.**
 
 ## Reference Documentation
 

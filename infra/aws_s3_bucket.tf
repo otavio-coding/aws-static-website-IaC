@@ -1,33 +1,21 @@
 /* 
 This file contains IaC that creates:
-  - The 'www.example.com' bucket:
-    - This is the main bucket that will store the index.html;
-    - Configuration for static website hosting;
+  - The 'subdomain.example.com' bucket:
+    - This is the bucket that will store the index.html;
     - Public read permitions;
     - Permitions to allow Github Actions deployment.
-    
-  - The 'example.com' bucket
-    - This buvket is configured will redirect all requests to the 'www.example.com' bucket. 
 */
 
 
-/* The following lines create and configure the 'www.example.com' */
-resource "aws_s3_bucket" "www" {
-  bucket        = "www.${var.registered_domain}"
+/* The following lines create and configure the 'subdomain.example.com' */
+resource "aws_s3_bucket" "subdomain" {
+  bucket        = "${var.subdomain}.${var.registered_domain}"
   force_destroy = true
-}
-
-/* Configuration to enable static hosting.*/
-resource "aws_s3_bucket_website_configuration" "www" {
-  bucket = aws_s3_bucket.www.id
-  index_document {
-    suffix = "index.html"
-  }
 }
 
 /* Allow public-read policies */
 resource "aws_s3_bucket_public_access_block" "public_access" {
-  bucket              = aws_s3_bucket.www.id
+  bucket              = aws_s3_bucket.subdomain.id
   block_public_policy = false # False value allows public access policies.
 }
 
@@ -47,8 +35,8 @@ data "aws_iam_policy_document" "github_actions_deploy" {
       "s3:ListBucket"
     ]
     resources = [
-      "${aws_s3_bucket.www.arn}/*", # Objects ARN (for Put/Delete) 
-      "${aws_s3_bucket.www.arn}"    # Bucket ARN (for ListBucket)
+      "${aws_s3_bucket.subdomain.arn}/*", # Objects ARN (for Put/Delete) 
+      "${aws_s3_bucket.subdomain.arn}"    # Bucket ARN (for ListBucket)
     ]
   }
 }
@@ -64,12 +52,12 @@ data "aws_iam_policy_document" "public_read" {
       identifiers = ["*"]
     }
     actions   = ["s3:GetObject"]
-    resources = ["${aws_s3_bucket.www.arn}/*"]
+    resources = ["${aws_s3_bucket.subdomain.arn}/*"]
   }
 }
 
 /* Combine policy documents created above into a single one */
-data "aws_iam_policy_document" "www_bucket_policy" {
+data "aws_iam_policy_document" "subdomain_bucket_policy" {
   source_policy_documents = [
     data.aws_iam_policy_document.public_read.json,
     data.aws_iam_policy_document.github_actions_deploy.json
@@ -78,25 +66,8 @@ data "aws_iam_policy_document" "www_bucket_policy" {
 }
 
 /* Finally, add policy to the bucket */
-resource "aws_s3_bucket_policy" "www_bucket_policy" {
-  bucket     = aws_s3_bucket.www.id
-  policy     = data.aws_iam_policy_document.www_bucket_policy.json
+resource "aws_s3_bucket_policy" "subdomain_bucket_policy" {
+  bucket     = aws_s3_bucket.subdomain.id
+  policy     = data.aws_iam_policy_document.subdomain_bucket_policy.json
   depends_on = [aws_s3_bucket_public_access_block.public_access] # 'depends_on' ensures public access is allowed first!
-}
-
-
-/* The following lines create and configure the 'example.com' */
-resource "aws_s3_bucket" "root" {
-  bucket        = var.registered_domain
-  force_destroy = true
-}
-
-/* Configuration to redirect all requests to www.example.com */
-resource "aws_s3_bucket_website_configuration" "root" {
-  bucket = aws_s3_bucket.root.id
-
-  redirect_all_requests_to {
-    host_name = aws_s3_bucket.www.bucket
-    protocol  = "http"
-  }
 }
