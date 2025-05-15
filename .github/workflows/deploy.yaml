@@ -58,5 +58,5 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           
       - name: Deploy to S3
-        run: aws s3 sync public/ s3://www.${{ secrets.AWS_REGISTERED_DOMAIN }} --delete
+        run: aws s3 sync public/ s3://${{ secrets.WEBSITE_DOMAIN_NAME }} --delete
 

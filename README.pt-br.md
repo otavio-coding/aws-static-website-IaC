@@ -1,51 +1,81 @@
-# Infraestrutura como Código (IaC) para Hospedagem de Site Estático na AWS S3
+# Infrastructure as Code (IaC) para Hospedagem de Site Estático na AWS S3 (Tradução pelo ChatGPT)
 
-Este projeto provisiona uma infraestrutura de hospedagem de site estático com permissões públicas de leitura na AWS S3 usando Terraform. Também inclui um workflow do GitHub Actions para integração contínua (CI), então, sempre que você fizer um push neste repositório, as mudanças são testadas e o conteúdo da pasta `public/` é automaticamente enviado para o bucket.
+## Demo: http://dev.otaviocoding.click
 
-## Dependências
+Este projeto provisiona uma infraestrutura de hospedagem de site estático com permissões públicas de leitura na **AWS S3** usando **Terraform**.  
+Também inclui um workflow do **GitHub Actions** para integração contínua (CI), de modo que toda vez que você fizer um push neste repositório, as alterações são testadas e o conteúdo da pasta `public/` é automaticamente implantado no bucket.
+
+---
+
+## 📦 Dependências
 
 - Terraform v1.10.5
 
-## Pré-requisitos
+---
+
+## ✅ Pré-requisitos
 
 ### Para a Infraestrutura AWS
 
-- Um domínio registrado com uma zona hospedada existente no Route 53  
-- Terraform instalado e configurado com credenciais válidas da AWS
+- Credenciais válidas da AWS  
+- Um domínio registrado `example.com` com uma **hosted zone** existente no **Route 53**  
+- Um certificado emitido pelo **ACM (Amazon Certificate Manager)** para o domínio `*.example.com`  
+- Sua **Hosted Zone** no Route 53 deve conter:
+  - O registro CNAME do certificado
+  - Registro **NS (Name Server)** e **SOA (Start of Authority)**  
+    *(Se você comprou o domínio através do Route 53, a hosted zone será criada automaticamente com esses registros)*
 
-### Para o CI do GitHub Actions
+### Para o GitHub Actions CI
 
-- Configure os seguintes segredos no repositório do GitHub:
+- Defina os seguintes **repository secrets** no GitHub:
   - `AWS_ACCOUNT_ID`
   - `AWS_REGION`
   - `AWS_REGISTERED_DOMAIN`  
-  Essas variáveis são necessárias no arquivo de workflow `deploy.yaml`.
 
-## Recursos Criados na AWS
+> Essas variáveis são utilizadas no arquivo de workflow `deploy.yaml`.
 
-- **Dois Buckets S3**:
-  - Um para o domínio raiz (ex: `example.com`) que redireciona para o segundo bucket
-  - Um para o subdomínio `www` (ex: `www.example.com`), que hospeda o conteúdo do site
+---
 
-- **Registros no Route 53**:
-  - Registros alias apontando para os buckets S3, criados dentro da zona hospedada existente
+## ☁️ Recursos AWS criados após `terraform apply`
 
-- **Função IAM**:
-  - Configurada com OIDC e pode ser assumida pelo GitHub Actions para acesso seguro e de curta duração
+- **S3 Bucket**  
+  - Um bucket para o subdomínio `www` (ex: `www.example.com`) onde o conteúdo do site será armazenado
 
-## Como Usar
+- **Distribuição CloudFront**  
+  - Uma distribuição **CloudFront** que servirá o `index.html` a partir do bucket S3 via conexão **HTTPS**
 
-1. Defina as variáveis do Terraform em um arquivo `.tfvars` ou passe-as como argumentos no próximo passo.
-2. Execute `terraform apply`. Esse passo é necessário para criar a função IAM e as permissões que permitem ao GitHub Actions fazer o deploy no seu bucket S3.
-3. Atualize o arquivo `index.html` e faça push das alterações para a branch `main` para acionar o CI. O conteúdo da pasta `public/` será enviado para o bucket S3.
-4. Pronto! Seu site estático estará funcionando no domínio registrado (`www.example.com` ou `example.com`).
+- **Registros Route 53**  
+  - Registros **Alias** apontando de `subdomain.example.com` para a distribuição CloudFront, criados na **hosted zone** existente
 
-## Aviso
+- **IAM Role**  
+  - Configurada com **OIDC**, pode ser assumida pelo **GitHub Actions** para acesso seguro e temporário
 
-Esta infraestrutura atualmente suporta apenas conexões **HTTP**. **Não use este setup para hospedar dados sensíveis ou privados.**
+---
 
-## Documentação de Referência
+## 🚀 Como usar
 
-- [Documentação do Provider AWS no Terraform](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)  
-- [Como usar funções IAM para conectar o GitHub Actions à AWS](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/)  
-- [GitHub: Configurando OIDC na AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
+1. Crie o arquivo `infra/.tfvars` com o seguinte conteúdo:
+```hcl
+registered_domain = "example.com"
+acm_domain_name   = "*.example.com"
+subdomain         = "dev"
+aws_account_id    = <seu-aws-account-id>
+github_account_id = "<seu-github-id>"
+github_repo       = "<nome-do-repo-no-github>" 
+```
+
+2. Execute `terraform apply`  
+   > Esse passo cria a **IAM Role** e as permissões que permitem ao GitHub Actions fazer deploy no S3.
+
+3. Atualize o arquivo `index.html` e faça `git push` para a branch `main`  
+   > O conteúdo da pasta `public/` será implantado automaticamente no bucket S3.
+
+4. Pronto! Seu site estático estará rodando em `subdominio.example.com`
+
+---
+
+## 📚 Documentação de Referência
+
+- [Terraform AWS Provider Docs](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)  
+- [Use IAM Roles to Connect GitHub Actions to AWS](https://aws.amazon.com/blogs/security/use-iam-roles-to-connect-github-actions-to-actions-in-aws/)  
+- [GitHub Docs: Configuring OIDC in AWS](https://docs.github.com/en/actions/security-for-github-actions/security-hardening-your-deployments/configuring-openid-connect-in-amazon-web-services)
