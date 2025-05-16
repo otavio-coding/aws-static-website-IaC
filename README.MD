@@ -1,5 +1,5 @@
 # Infrastructure as Code (IaC) for Static Website Hosting on AWS S3
-## Demo: http://dev.otaviocoding.click
+## Demo: https://dev.otaviocoding.click
 This project provisions a static website hosting infrastructure with public read permitions on AWS S3 using Terraform. It also includes a GitHub Actions workflow for continuous integration (CI), so every time you push to this repository, the changes are tested and the `public/` folder content is automatically deployed to the bucket. 
 
 ## Dependencies

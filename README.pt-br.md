@@ -1,6 +1,6 @@
 # Infrastructure as Code (IaC) para Hospedagem de Site Estático na AWS S3 (Tradução pelo ChatGPT)
 
-## Demo: http://dev.otaviocoding.click
+## Demo: https://dev.otaviocoding.click
 
 Este projeto provisiona uma infraestrutura de hospedagem de site estático com permissões públicas de leitura na **AWS S3** usando **Terraform**.  
 Também inclui um workflow do **GitHub Actions** para integração contínua (CI), de modo que toda vez que você fizer um push neste repositório, as alterações são testadas e o conteúdo da pasta `public/` é automaticamente implantado no bucket.
